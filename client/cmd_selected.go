@@ -107,21 +107,13 @@ func (c *Client) executeSearch(uid bool, criteria *imap.SearchCriteria, charset 
 	return
 }
 
-func (c *Client) search(uid bool, criteria *imap.SearchCriteria) (ids []uint32, err error) {
-	ids, status, err := c.executeSearch(uid, criteria, "UTF-8")
-	if status != nil && status.Code == imap.CodeBadCharset {
-		// Some servers don't support UTF-8
-		ids, status, err = c.executeSearch(uid, criteria, "US-ASCII")
-		if status != nil && status.Code == imap.CodeBadCharset {
-			ids, status, err = c.executeSearch(uid, criteria, "GBK")
-			if status != nil && status.Code == imap.CodeBadCharset {
-				ids, status, err = c.executeSearch(uid, criteria, "GB2312")
-				if status != nil && status.Code == imap.CodeBadCharset {
-					ids, _, err = c.executeSearch(uid, criteria, "GB18030")
-				}
-			}
-		}
-	}
+func (c *Client) search(uid bool, criteria *imap.SearchCriteria, charset string) (ids []uint32, err error) {
+	// We will use the the `UTF-8` or `US-ASCII` usually.
+	ids, _, err = c.executeSearch(uid, criteria, charset)
+	//if status != nil && status.Code == imap.CodeBadCharset {
+	// Some servers don't support UTF-8
+	//ids, _, err = c.executeSearch(uid, criteria, charset)
+	//}
 	return
 }
 
@@ -132,14 +124,14 @@ func (c *Client) search(uid bool, criteria *imap.SearchCriteria) (ids []uint32, 
 // the intersection (AND function) of all the messages that match those keys.
 // Criteria must be UTF-8 encoded. See RFC 3501 section 6.4.4 for a list of
 // searching criteria.
-func (c *Client) Search(criteria *imap.SearchCriteria) (seqNums []uint32, err error) {
-	return c.search(false, criteria)
+func (c *Client) Search(criteria *imap.SearchCriteria, charset string) (seqNums []uint32, err error) {
+	return c.search(false, criteria, charset)
 }
 
 // UidSearch is identical to Search, but UIDs are returned instead of message
 // sequence numbers.
-func (c *Client) UidSearch(criteria *imap.SearchCriteria) (uids []uint32, err error) {
-	return c.search(true, criteria)
+func (c *Client) UidSearch(criteria *imap.SearchCriteria, charset string) (uids []uint32, err error) {
+	return c.search(true, criteria, charset)
 }
 
 func (c *Client) fetch(uid bool, seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error {

@@ -121,7 +121,7 @@ func TestClient_Search(t *testing.T) {
 	var results []uint32
 	go func() {
 		var err error
-		results, err = c.Search(criteria)
+		results, err = c.Search(criteria, "UTF-8")
 		done <- err
 	}()
 

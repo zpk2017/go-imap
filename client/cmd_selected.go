@@ -115,7 +115,10 @@ func (c *Client) search(uid bool, criteria *imap.SearchCriteria) (ids []uint32, 
 		if status != nil && status.Code == imap.CodeBadCharset {
 			ids, status, err = c.executeSearch(uid, criteria, "GBK")
 			if status != nil && status.Code == imap.CodeBadCharset {
-				ids, _, err = c.executeSearch(uid, criteria, "GB2312")
+				ids, status, err = c.executeSearch(uid, criteria, "GB2312")
+				if status != nil && status.Code == imap.CodeBadCharset {
+					ids, _, err = c.executeSearch(uid, criteria, "GB18030")
+				}
 			}
 		}
 	}
